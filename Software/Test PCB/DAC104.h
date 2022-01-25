@@ -27,11 +27,14 @@
 
 #define INTEGRATOR_DAC DAC_D_ADDRESS
 #define TEST_DAC DAC_C_ADDRESS
+#define AMPLIFIER_DAC DAC_A_ADDRESS
 
-
+/* Variables */
 extern unsigned int PhotonCounterBiasDAC[6];
+extern unsigned int DAC_Values[4];
 
-extern void InitializeDAC104(void);
-extern void SetDAC(unsigned short theDAC, unsigned short theValue);
+/* Functions */
+void InitializeDAC104(void);
+void SetDAC(unsigned short theDAC, unsigned short theValue);
 void SetDAC_mV(unsigned short theDAC, unsigned short theValue);
 

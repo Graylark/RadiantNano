@@ -10,7 +10,7 @@
 #include "Test PCB.h"
 #include "SPI.h"
 
-unsigned int PhotonCounterBiasDAC[6];
+unsigned int DAC_Values[4];
 
 void SendDACValue(unsigned int theValue) {
 	u_int theInt;
@@ -102,7 +102,19 @@ void SetDAC_mV(unsigned short theDAC, unsigned short theValue) {
  */
 void SetDAC(unsigned short theDAC, unsigned short theValue) {
 	unsigned short theShort;
-
+    switch (theDAC) {
+        case AMPLIFIER_DAC:
+            DAC_Values[0] = theValue;
+            break;
+        case TEST_DAC:
+            DAC_Values[2] = theValue;
+            break;
+        case INTEGRATOR_DAC:
+            DAC_Values[3] = theValue;
+            break;
+        default:
+            break;
+    }
 	theShort = theValue;
 
 	/* point to channel and put in value */

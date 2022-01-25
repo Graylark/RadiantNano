@@ -127,7 +127,7 @@ void __attribute__((interrupt, no_auto_psv)) _ADCAN0Interrupt(void) {
     IFS5bits.ADCAN0IF = 0;
     
     /* Zero the integration circuit. It's low true. */
-    Integrator_Zero_LatchBit = 0;
+    /* Integrator_Zero_LatchBit = 0; */
     
     /* Get the value */
     theShort = ADCBUF0;
@@ -142,9 +142,9 @@ void __attribute__((interrupt, no_auto_psv)) _ADCAN0Interrupt(void) {
     }
     
     /* Release the zeroing on the integration circuit. */
-    Integrator_Zero_LatchBit = 1;
+    /* Integrator_Zero_LatchBit = 1; */
     
-    
+    HistogramCount++;
     
 }
 
@@ -198,14 +198,15 @@ void __attribute__((interrupt, no_auto_psv)) _CNAInterrupt(void) {
 void __attribute__((interrupt, no_auto_psv)) _CNBInterrupt(void) {
 
 	IFS0bits.CNBIF = 0;
-    if (1 == Peak_Trigger_PortBit) {
-        if (ADC_TriggerFromPeak) {
-            /* Start Analog Out ADC */
-            
+    if (ADC_TriggerFromPeak) {
+        if (1 == Peak_Trigger_PortBit) {
+            /* Start sampling  */
+        } else {
+            /* Start conversion */
+                
         }
-        
-    } else if (1 == Threshold_Trigger_PortBit) {
-        if (ADC_TriggerFromThreshold) {
+    } else if (ADC_TriggerFromThreshold) {
+        if (1 == Threshold_Trigger_PortBit) {
             /* Start Analog Out ADC */
             /* This may happen through ADTRIG31 PPS input */
         }

@@ -221,6 +221,7 @@ extern ProcessStateType ProcessState;
 
 extern unsigned int Histogram[HISTOGRAM_SIZE];
 extern volatile Bool HistogramOverflow;
+extern volatile unsigned long HistogramCount;
 
 extern Bool ADC_TriggerFromThreshold;
 extern Bool ADC_TriggerFromDelay;
@@ -240,6 +241,9 @@ extern unsigned short HighVoltageCentivolts;
 extern Bool HighVoltageOn;
 extern Bool DAC_On;
 extern unsigned int DAC_Centivolts;
+
+extern unsigned short AmplifierDAC;
+extern unsigned short IntegratorDAC;
 
 extern unsigned char BaudRateDivisor;
 

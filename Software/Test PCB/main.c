@@ -109,6 +109,7 @@
 #include <xc.h>
  
 #include "Test PCB.h"
+#include "DAC104.h"
 #include "MAX1932.h"
 #include "PICFlash.h"
 #include "SPI.h"
@@ -127,6 +128,7 @@ ProcessStateType ProcessState;
 
 /* Variables */
 volatile Bool HistogramOverflow;
+volatile unsigned long HistogramCount;
 Bool ADC_TriggerFromThreshold;
 Bool ADC_TriggerFromDelay;
 Bool ADC_TriggerFromPeak;
@@ -147,6 +149,9 @@ unsigned short HighVoltageCentivolts;
 Bool HighVoltageOn;
 Bool DAC_On;
 unsigned int DAC_Centivolts;
+
+unsigned short AmplifierDAC;
+unsigned short IntegratorDAC;
 
 unsigned char BaudRateDivisor;
 
@@ -433,6 +438,7 @@ void SetUpADC(void) {
     
     /* Set default sampling time for ADC core 0 */
     /* Time is measured in 20ns clock ticks */
+    /* ticks equal value + 2 */
     ADCORE0Lbits.SAMC = 4;
     
     /* Set resolution for ADC core 0 to 12 bits */
@@ -633,13 +639,17 @@ void InitializeMeasurement(void) {
     } else if (ADC_TriggerFromThreshold) {
         ADC_TRIGGER_RPIR = ADC_TRIGGER_THRESHOLD_RP;
     }
-
-	/* Turn on the high voltage */
+    
+   	/* Turn on the high voltage */
 	SetHighVoltage(HighVoltageCentivolts);
     
-    /* Turn on the DAC */
+    /* Turn on the internal DAC */
     SetDACVoltage();
-
+    
+    /* Initialize some variables */
+    HistogramCount = 0;
+    HistogramOverflow = FALSE;
+    
 	/* Record the temperature */
    	InitializationTemperature = GetTemperature(); 
 
@@ -656,8 +666,12 @@ void InitializeMeasurement(void) {
 	/* Wait for high voltage to stabilize. */
 	Wait(20);
     
-    /* Enable ADC AN0 interrupts */
+    /* Enable ADC AN0 early interrupts */
     ADEIELbits.EIEN0 = 1;
+    
+    /* Enable ADC core 0 interrupts */
+    ADIELbits.IE0 = 1;
+    IEC5bits.ADCAN0IE = 1;
 }
 
 
@@ -668,7 +682,10 @@ void SendHistogram(void) {
     unsigned int index;
     unsigned char theString[12];
     
-    PutU2QString("keV,counts\n\r");
+    PutU2QString("Total counts: ");
+    IntToString(HistogramCount, theString);
+    PutU2String(theString);
+    PutU2QString("\n\rkeV,counts\n\r");
     
     for (index=0; index<HISTOGRAM_SIZE; index++){
         IntToString(index, theString);
@@ -690,7 +707,10 @@ void HaltMeasurement(void) {
     
 	/* Turn off the High Voltage power supply */
 	SetHighVoltage(0x00);
-	
+    
+    /* Disable ADC interrupts */
+    ADIELbits.IE0 = 0;
+    IEC5bits.ADCAN0IE = 0;
 }
 
 /* ******************************************************************
@@ -747,6 +767,10 @@ int main(void){
         theLong = ((FMcycle * 1000000)/(38400 * 16)) - 1;
 		BaudRateDivisor = (unsigned char)theLong;
 		UART2BRGH = FALSE;
+        
+         /* Set up the external DAC */
+        SetDAC(AMPLIFIER_DAC, 66);
+        SetDAC(INTEGRATOR_DAC, 166);
 	}
     
 

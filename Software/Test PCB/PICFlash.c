@@ -5,6 +5,7 @@
 
 
 #include "Test PCB.h"
+#include "DAC104.h"
 #include "UART.h"
 #include "libpic30.h"
 
@@ -12,9 +13,9 @@
 #define SETTINGS_FLASH_ADDRESS 0x0F000
 #define FLASH_WRITE_LATCH_PAGE 0x00FA
 #define SETTINGS_FLASH_PAGE 0x0000
-#define SETTINGS_RECORD_SIZE 14
-#define SETTINGS_RECORD_INTS 7
-#define SETTINGS_RECORD_WRITES 4
+#define SETTINGS_RECORD_SIZE 18
+#define SETTINGS_RECORD_INTS 9
+#define SETTINGS_RECORD_WRITES 5
 
 typedef struct {
 	union {
@@ -26,6 +27,8 @@ typedef struct {
             unsigned short DAC_Centivolts;
 			unsigned short BaudRateDivisor;
 			unsigned short UART2BRGH;
+            unsigned short AmplifierDAC;
+            unsigned short IntegratorDAC;
 		};
 		struct{
 			unsigned char Data[SETTINGS_RECORD_SIZE];
@@ -61,7 +64,9 @@ void SaveSettingsToFlash(void) {
     pSettingsRecord->DAC_Centivolts = DAC_Centivolts;
 	pSettingsRecord->BaudRateDivisor = BaudRateDivisor;
 	pSettingsRecord->UART2BRGH = UART2BRGH;
-	
+    pSettingsRecord->AmplifierDAC = AmplifierDAC;
+    pSettingsRecord->IntegratorDAC = IntegratorDAC;
+
 
 	/* Set the PIC flash page */
 	TABLPAG_Save = TBLPAG;
@@ -189,7 +194,10 @@ Bool ReadSettingsFromFlash(void) {
         DAC_Centivolts = pSettingsRecord->DAC_Centivolts;
 		BaudRateDivisor = pSettingsRecord->BaudRateDivisor;
 		UART2BRGH = pSettingsRecord->UART2BRGH;
-       
+        AmplifierDAC = pSettingsRecord->AmplifierDAC;
+        SetDAC(AMPLIFIER_DAC, AmplifierDAC);
+        IntegratorDAC = pSettingsRecord->IntegratorDAC;
+        SetDAC(INTEGRATOR_DAC, IntegratorDAC);
 		theReturn = TRUE;
 	}
 

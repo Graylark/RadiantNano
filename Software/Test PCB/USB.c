@@ -158,6 +158,14 @@ void ParseUserInput(void) {
                     PutU2QString("off\n\r");
                 }
                 
+                PutU2QString("Amplifier DAC value: ");
+                IntToString(DAC_Values[0], theString);
+                PutU2String(theString);
+                PutU2QString("\n\rIntegrator DAC value: ");
+                IntToString(DAC_Values[3], theString);
+                PutU2String(theString);
+                PutU2QString("\n\r");
+                
                 PutU2Char(0x00);
 		break;
 
@@ -253,14 +261,28 @@ void ParseUserInput(void) {
                 PutU2QString("Turn off DAC\n\r");
                 DAC_On = FALSE;
                 DACCTRL1Lbits.DACON = FALSE;
-            } else if ('I' == CommandString[1]) {
-                /* Set Integrator DAC */  
-                PutU2QString("Enter DAC value (0 - 1023):");
+            } else if ('A' == CommandString[1]) {
+                /* Set Amplifier DAC */  
+                PutU2QString("Enter amplifier DAC value (0 - 1023):");
                 CommandStringIndex = GetCommandString();
                 theInt = StringToInt(CommandString);
                 if (theInt > 1023) {
                     theInt = 1023;
                 }
+                AmplifierDAC = theInt;
+                IntToString(theInt, theString);
+                PutU2String(theString);
+                PutU2QString("\n\r");
+                SetDAC(AMPLIFIER_DAC, theInt);
+            }else if ('I' == CommandString[1]) {
+                /* Set Integrator DAC */  
+                PutU2QString("Enter integrator DAC value (0 - 1023):");
+                CommandStringIndex = GetCommandString();
+                theInt = StringToInt(CommandString);
+                if (theInt > 1023) {
+                    theInt = 1023;
+                }
+                IntegratorDAC = theInt;
                 IntToString(theInt, theString);
                 PutU2String(theString);
                 PutU2QString("\n\r");
